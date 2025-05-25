@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto;">
+    <h2 style="text-align: center; margin-bottom: 20px;">Вход</h2>
+
+    <form method="post" style="display: flex; flex-direction: column; gap: 15px;">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <div style="color: red;">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+        {{ form.username.label_tag }}
+        {{ form.username }}
+        {% if form.username.errors %}
+            <div style="color: red;">{{ form.username.errors }}</div>
+        {% endif %}
+
+        {{ form.password.label_tag }}
+        {{ form.password }}
+        {% if form.password.errors %}
+            <div style="color: red;">{{ form.password.errors }}</div>
+        {% endif %}
+    </div>
+
+        <button type="submit" class="btn" style="width: 100%;">Войти</button>
+    </form>
+
+
+    <p style="text-align: center; margin-top: 15px;">
+        Нет аккаунта?
+        <a href="{% url 'ads:register' %}" style="color: #007bff; text-decoration: none;">Зарегистрируйтесь</a>
+    </p>
+</div>
+{% endblock %}
