@@ -1,0 +1,21 @@
+{% if is_paginated %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page=1{% if current_search %}&search={{ current_search }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_condition %}&condition={{ current_condition }}{% endif %}" 
+           class="page-link">&laquo; Первая</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_condition %}&condition={{ current_condition }}{% endif %}" 
+           class="page-link">Предыдущая</a>
+    {% endif %}
+    
+    <span class="current-page">
+        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+    </span>
+    
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_condition %}&condition={{ current_condition }}{% endif %}" 
+           class="page-link">Следующая</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_condition %}&condition={{ current_condition }}{% endif %}" 
+           class="page-link">Последняя &raquo;</a>
+    {% endif %}
+</div>
+{% endif %}

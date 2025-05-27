@@ -1,0 +1,33 @@
+<header>
+    <nav>
+        <ul>
+            <li><a href="{% url 'ads:index' %}">Главная страница</a></li>
+            <li><a href="{% url 'ads:list' %}">Объявления</a></li>
+            
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'ads:incoming_requests' %}">Запросы на обмен</a></li>
+                <li><a href="{% url 'ads:my_offers' %}">Мои предложения</a></li>
+                <li><a href="{% url 'ads:create' %}">Создать объявление</a></li>
+                <li>
+                    <form method="post" action="{% url 'ads:logout' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" style="
+                            background: none;
+                            border: none;
+                            color: white;
+                            font-weight: bold;
+                            cursor: pointer;
+                            padding: 0;
+                        ">
+                            Выход ({{ user.username }})
+                        </button>
+                    </form>
+                </li>
+
+            {% else %}
+                <li><a href="{% url 'ads:login' %}">Войти</a></li>
+                <li><a href="{% url 'ads:register' %}">Регистрация</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</header>

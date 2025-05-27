@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-title">Предложение обмена</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Основной блок с карточками -->
+        <div class="exchange-content mb-4">
+            <!-- Левая карточка (ваше предложение) -->
+            <div class="exchange-offer">
+                <h4 class="exchange-subtitle">Ваше предложение:</h4>
+                <div id="ad-sender-preview">
+                    {% with form.ad_sender.field.queryset.first as sender_ad %}
+                    <div class="ad-card">
+                        {% if sender_ad %}
+                        <div class="ad-image" style="background-image: url('{{ sender_ad.image_url|default:'https://via.placeholder.com/300x200?text=No+Image' }}')"></div>
+                        <div class="ad-content">
+                            <span class="ad-category">{{ sender_ad.category.name }}</span>
+                            <h3 class="ad-title">{{ sender_ad.title }}</h3>
+                            <p class="ad-user">от {{ sender_ad.user.username }} — {{ sender_ad.created_at|date:"d.m.Y" }}</p>
+                            <p class="ad-description">{{ sender_ad.description|truncatewords:15 }}</p>
+                            <div class="ad-meta">
+                                <span>Состояние: {{ sender_ad.condition.name }}</span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="ad-content">
+                            <p class="text-muted">Объявление отправителя ещё не выбрано.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endwith %}
+                </div>
+                
+                <div class="mt-3">
+                    <label for="{{ form.ad_sender.id_for_label }}" class="form-label">Выберите ваше объявление:</label>
+                    {{ form.ad_sender|add_class:"form-select" }}
+                    {% for error in form.ad_sender.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Иконка обмена -->
+            <div class="exchange-icon">
+                <i class="fas fa-exchange-alt fa-2x"></i>
+            </div>
+            
+            <!-- Правая карточка (получаете) -->
+            <div class="exchange-offer">
+                <h4 class="exchange-subtitle">Вы получаете:</h4>
+                <div class="ad-card">
+                    <div class="ad-image" style="background-image: url('{{ ad_receiver.image_url|default:'https://via.placeholder.com/300x200?text=No+Image' }}')"></div>
+                    <div class="ad-content">
+                        <span class="ad-category">{{ ad_receiver.category.name }}</span>
+                        <h3 class="ad-title">{{ ad_receiver.title }}</h3>
+                        <p class="ad-user">от {{ ad_receiver.user.username }} — {{ ad_receiver.created_at|date:"d.m.Y" }}</p>
+                        <p class="ad-description">{{ ad_receiver.description|truncatewords:15 }}</p>
+                        <div class="ad-meta">
+                            <span>Состояние: {{ ad_receiver.condition.name }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Форма обмена -->
+        <div class="exchange-form">
+            <div class="mb-3">
+                <label for="{{ form.comment.id_for_label }}" class="form-label">
+                    <i class="fas fa-comment"></i> Комментарий к предложению:
+                </label>
+                {{ form.comment|add_class:"form-control"|attr:"rows:3" }}
+                {% for error in form.comment.errors %}
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
+            </div>
+            
+            {{ form.ad_receiver }}
+            
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-paper-plane"></i> Отправить предложение
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+/* Общие стили для формы обмена */
+.exchange-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 1.5rem;
+}
+
+.exchange-offer {
+    flex: 1;
+    min-width: 0;
+}
+
+.exchange-subtitle {
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+/* Иконка обмена */
+.exchange-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+    color: var(--accent-color);
+}
+
+/* Стили карточки объявления */
+.ad-card {
+    border: 1px solid #e0e0e0;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    height: 100%;
+    margin-bottom: 1rem;
+    transition: var(--transition);
+}
+
+.ad-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.ad-image {
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    background-color: #f5f5f5;
+}
+
+.ad-content {
+    padding: 1rem;
+}
+
+.ad-title {
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+    color: var(--dark-color);
+}
+
+.ad-user {
+    font-size: 0.85rem;
+    color: var(--gray-color);
+    margin-bottom: 0.5rem;
+}
+
+.ad-description {
+    font-size: 0.9rem;
+    color: var(--dark-color);
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ad-meta {
+    font-size: 0.85rem;
+    color: var(--gray-color);
+}
+
+.ad-category {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+
+/* Стили формы */
+.exchange-form {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-select, .form-control {
+    border: 1px solid #ced4da;
+    border-radius: var(--border-radius);
+    padding: 0.5rem 0.75rem;
+    width: 100%;
+    transition: var(--transition);
+}
+
+.form-select:focus, .form-control:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.2rem rgba(72, 149, 239, 0.25);
+}
+
+/* Кнопка отправки */
+.btn-submit {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.btn-submit:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow);
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+    .exchange-content {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .exchange-icon {
+        transform: rotate(90deg);
+        padding: 1rem 0;
+    }
+    
+    .btn-submit {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const adSenderSelect = document.getElementById('id_ad_sender');
+    
+    if (adSenderSelect) {
+        adSenderSelect.addEventListener('change', function() {
+            const adId = this.value;
+            
+            fetch(`/ad/preview/${adId}/`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.html) {
+                    document.getElementById('ad-sender-preview').innerHTML = data.html;
+                } else if (data.error) {
+                    console.error(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

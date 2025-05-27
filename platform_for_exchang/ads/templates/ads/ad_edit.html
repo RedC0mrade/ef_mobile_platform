@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Редактирование объявления - {{ ad.title }}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="edit-header">
+            <h1 class="page-title">Редактирование объявления</h1>
+            <a href="{% url 'ads:detail' ad.id %}" class="btn btn-back">
+                <i class="fas fa-arrow-left"></i> Назад к объявлению
+            </a>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="ad-edit-form">
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                <div class="form-column">
+                    <div class="form-group">
+                        <label for="{{ form.title.id_for_label }}">Название</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="error-message">{{ form.title.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.description.id_for_label }}">Описание</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="error-message">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.image_url.id_for_label }}">Ссылка на изображение</label>
+                        {{ form.image_url }}
+                        {% if form.image_url.errors %}
+                            <div class="error-message">{{ form.image_url.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-column">
+                    <div class="form-group">
+                        <label for="{{ form.category.id_for_label }}">Категория</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="error-message">{{ form.category.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.condition.id_for_label }}">Состояние</label>
+                        {{ form.condition }}
+                        {% if form.condition.errors %}
+                            <div class="error-message">{{ form.condition.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="image-preview">
+                        <h4>Предпросмотр изображения:</h4>
+                        <div class="preview-container" id="imagePreview" 
+                             style="background-image: url('{{ form.image_url.value|default:'https://img.freepik.com/premium-vector/no-photo-available-vector-icon-default-image-symbol-picture-coming-soon-web-site-mobile-app_87543-18055.jpg' }}')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-save">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+                <a href="{% url 'ads:delete' ad.id %}" class="btn btn-delete">
+                    <i class="fas fa-trash"></i> Удалить объявление
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <style>
+        .edit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .btn-back {
+            background-color: var(--gray-color);
+        }
+
+        .btn-back:hover {
+            background-color: #5a6268;
+        }
+
+        .ad-edit-form {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .form-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.2);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .image-preview {
+            margin-top: 1rem;
+        }
+
+        .preview-container {
+            height: 200px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border: 1px dashed #ddd;
+            border-radius: var(--border-radius);
+            margin-top: 0.5rem;
+            background-color: #f8f9fa;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-save {
+            background-color: var(--success-color);
+        }
+
+        .btn-save:hover {
+            background-color: #3aa8d8;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn-save,
+            .btn-delete {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+
+    <script>
+        document.getElementById('{{ form.image_url.id_for_label }}').addEventListener('input', function() {
+            const preview = document.getElementById('imagePreview');
+            preview.style.backgroundImage = `url('${this.value || 'https://img.freepik.com/premium-vector/no-photo-available-vector-icon-default-image-symbol-picture-coming-soon-web-site-mobile-app_87543-18055.jpg'}')`;
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Объявления для обмена{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-title">Доступные объявления</h1>
+    
+    <!-- Форма поиска и фильтрации -->
+    <form method="get" class="filter-form">
+        <div class="search-box">
+            <input type="text" name="search" placeholder="Поиск по названию и описанию" 
+                   value="{{ current_search }}" class="search-input">
+            <button type="submit" class="btn btn-search">
+                <i class="fas fa-search"></i> Поиск
+            </button>
+        </div>
+        
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="category">Категория:</label>
+                <select name="category" id="category" class="filter-select">
+                    <option value="">Все категории</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" 
+                                {% if current_category == category.id|stringformat:"s" %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="condition">Состояние:</label>
+                <select name="condition" id="condition" class="filter-select">
+                    <option value="">Все состояния</option>
+                    {% for condition in conditions %}
+                        <option value="{{ condition.id }}" 
+                                {% if current_condition == condition.id|stringformat:"s" %}selected{% endif %}>
+                            {{ condition.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-filter">Применить</button>
+            <a href="{% url 'ads:list' %}" class="btn btn-reset">Сбросить</a>
+        </div>
+    </form>
+    
+    <div class="ads-grid">
+        {% for ad in object_list %}
+            <div class="ad-card">
+                <div class="ad-image" style="background-image: url('{% if ad.image_url %}{{ ad.image_url }}{% else %}https://via.placeholder.com/300x200?text=No+Image{% endif %}')"></div>
+                <div class="ad-content">
+                    <span class="ad-category">{{ ad.category }}</span>
+                    <h3 class="ad-title">{{ ad.title }}</h3>
+                    <p class="ad-user">От: {{ ad.user.username }}</p>
+                    <p class="ad-description">{{ ad.description|truncatewords:20 }}</p>
+                    <div class="ad-meta">
+                        <span>Состояние: {{ ad.condition }}</span>
+                        <span>{{ ad.created_at|date:"d.m.Y" }}</span>
+                    </div>
+                    <a href="{% url 'ads:detail' ad.id %}" class="btn" style="margin-top: 1rem; display: inline-block;">Подробнее</a>
+                </div>
+            </div>
+        {% empty %}
+            <p class="no-ads">Объявлений не найдено.</p>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+        {% include "ads/components/pagination.html" %}
+    {% endif %}
+</div>
+
+<style>
+    /* Стили для формы фильтрации */
+    .filter-form {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        margin-bottom: 2rem;
+    }
+    
+    .search-box {
+        display: flex;
+        margin-bottom: 1rem;
+    }
+    
+    .search-input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius) 0 0 var(--border-radius);
+        font-size: 1rem;
+    }
+    
+    .btn-search {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0 1.5rem;
+        border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        cursor: pointer;
+    }
+    
+    .filter-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .filter-group label {
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .filter-select {
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+    }
+    
+    .btn-filter {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        height: fit-content;
+    }
+    
+    .btn-reset {
+        background: var(--gray-color);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        text-decoration: none;
+        height: fit-content;
+    }
+    
+    .no-ads {
+        text-align: center;
+        grid-column: 1 / -1;
+        padding: 2rem;
+        color: var(--gray-color);
+    }
+</style>
+{% endblock %}

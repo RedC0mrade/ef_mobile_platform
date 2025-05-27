@@ -1,0 +1,68 @@
+<div class="ad-card">
+    <div class="ad-image" style="background-image: url('{{ ad.image_url|default:'https://via.placeholder.com/300x200?text=No+Image' }}')"></div>
+    <div class="ad-content">
+        <span class="ad-category">{{ ad.category.name }}</span>
+        <h3 class="ad-title">{{ ad.title }}</h3>
+        <p class="ad-user">от {{ ad.user.username }} — {{ ad.created_at|date:"d.m.Y" }}</p>
+        <p class="ad-description">{{ ad.description|truncatewords:15 }}</p>
+        <div class="ad-meta">
+            <span>Состояние: {{ ad.condition.name }}</span>
+        </div>
+    </div>
+</div>
+
+<style>
+.ad-card {
+    border: 1px solid #e0e0e0;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    height: 100%;
+    transition: var(--transition);
+    margin-bottom: 1rem;
+}
+.ad-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.ad-image {
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    background-color: #f5f5f5;
+}
+.ad-content {
+    padding: 1rem;
+}
+.ad-title {
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+    color: var(--dark-color);
+}
+.ad-user {
+    font-size: 0.85rem;
+    color: var(--gray-color);
+    margin-bottom: 0.5rem;
+}
+.ad-description {
+    font-size: 0.9rem;
+    color: var(--dark-color);
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.ad-meta {
+    font-size: 0.85rem;
+    color: var(--gray-color);
+}
+.ad-category {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+</style>

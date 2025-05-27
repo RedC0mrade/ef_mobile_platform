@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ ad.title }} - Platform for exchange
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="ad-detail">
+            <div class="ad-header">
+                <span class="ad-category">{{ ad.category }}</span>
+                <h1 class="page-title">{{ ad.title }}</h1>
+                <div class="ad-meta">
+                    <span class="ad-user"><i class="fas fa-user"></i> {{ ad.user.username }}</span>
+                    <span class="ad-date"><i class="far fa-clock"></i> {{ ad.created_at|date:"d.m.Y H:i" }}</span>
+                    <span class="ad-condition"><i class="fas fa-tag"></i> {{ ad.condition }}</span>
+                </div>
+            </div>
+
+            <div class="ad-body">
+                <div class="ad-image-container">
+                    <div class="ad-main-image" 
+                         style="background-image: url('{{ ad.image_url|default:'https://via.placeholder.com/800x500?text=No+Image' }}')">
+                    </div>
+                </div>
+                
+                <div class="ad-description">
+                    <h3>Описание</h3>
+                    <p>{{ ad.description|linebreaks }}</p>
+                </div>
+            </div>
+
+            <div class="ad-footer">
+                <!-- Блок предложения обмена -->
+                <div class="exchange-section">
+                    <h3>Предложить обмен</h3>
+                    <div class="exchange-actions">
+                        {% if request.user.is_authenticated %}
+                            {% if request.user != ad.user %}
+                                <a href="{% url 'ads:create_exchange' ad.id %}" 
+                                   class="btn btn-exchange"
+                                   data-bs-toggle="tooltip" 
+                                   title="Выберите свое объявление для обмена">
+                                    <i class="fas fa-exchange-alt"></i> Предложить обмен
+                                </a>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    Вы владелец объявления
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="auth-required">
+                                <a href="{% url 'ads:login' %}?next={% url 'ads:detail' ad.id %}" 
+                                   class="btn btn-login">
+                                    <i class="fas fa-sign-in-alt"></i> Войдите, чтобы предложить обмен
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>                
+                {% if request.user == ad.user %}
+                    <div class="ad-actions">
+                        <a href="{% url 'ads:edit' ad.id %}" class="btn btn-edit">
+                            <i class="fas fa-edit"></i> Редактировать
+                        </a>
+                        <form action="{% url 'ads:delete' ad.id %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" 
+                                    class="btn btn-delete"
+                                    onclick="return confirm('Вы уверены, что хотите удалить это объявление?')">
+                                <i class="fas fa-trash"></i> Удалить
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <a href="{% url 'ads:list' %}" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i> Назад к списку
+        </a>
+    </div>
+
+    <style>
+        .ad-detail {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+        }
+
+        .ad-header {
+            padding: 2rem;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
+        }
+
+        .ad-category {
+            display: inline-block;
+            background: #4895ef;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .ad-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            padding: 2rem;
+        }
+
+        .ad-main-image {
+            height: 500px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+
+        .ad-description {
+            line-height: 1.8;
+            color: #444;
+        }
+
+        .ad-description h3 {
+            color: #3f37c9;
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        .ad-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        .ad-meta i {
+            margin-right: 0.5rem;
+            color: #4895ef;
+        }
+
+        .ad-footer {
+            padding: 2rem;
+            background-color: #f8f9fa;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .exchange-section h3 {
+            color: #3f37c9;
+            margin-bottom: 1rem;
+        }
+
+        .btn-exchange {
+            background: #4895ef;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-exchange:hover {
+            background: #3f37c9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-login {
+            background: #4cc9f0;
+            color: white;
+        }
+
+        .alert-info {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-radius: 8px;
+        }
+
+        .ad-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-back {
+            margin-top: 2rem;
+            background: #6c757d;
+            color: white;
+        }
+
+        @media (max-width: 992px) {
+            .ad-body {
+                grid-template-columns: 1fr;
+            }
+
+            .ad-main-image {
+                height: 350px;
+            }
+
+            .ad-footer {
+                flex-direction: column;
+                gap: 2rem;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .ad-header,
+            .ad-body,
+            .ad-footer {
+                padding: 1.5rem;
+            }
+
+            .ad-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+
+    <script>
+        // Активация всплывающих подсказок
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        })
+    </script>
+{% endblock %}
