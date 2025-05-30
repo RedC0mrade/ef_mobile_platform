@@ -7,13 +7,19 @@ from .models import Category, Condition, Ad, ExchangeStatus, Exchange
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ["id", "name"]
+        fields = [
+            "id",
+            "name",
+        ]
 
 
 class ConditionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Condition
-        fields = ["id", "name"]
+        fields = [
+            "id",
+            "name",
+        ]
 
 
 class AdSerializer(serializers.ModelSerializer):
@@ -36,7 +42,10 @@ class AdSerializer(serializers.ModelSerializer):
 class ExchangeStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExchangeStatus
-        fields = ["id", "status"]
+        fields = [
+            "id",
+            "status",
+        ]
 
 
 class ExchangeSerializer(serializers.ModelSerializer):
@@ -66,15 +75,46 @@ class ExchangeSerializer(serializers.ModelSerializer):
             "status",
             "created_at",
         ]
-        read_only_fields = ["status", "created_at"]
+        read_only_fields = [
+            "status",
+            "created_at",
+        ]
 
     def validate(self, data):
+
+        ad_sender = data.get("ad_sender")
+        ad_receiver = data.get("ad_receiver")
+
+        if ad_sender == ad_receiver:
+            raise serializers.ValidationError(
+                {
+                    "non_field_errors": [
+                        "Нельзя обменивать одно и то же объявление."
+                    ]
+                }
+            )
+
+        if ad_sender.user.username == ad_receiver.user.username:
+            raise serializers.ValidationError(
+                {
+                    "non_field_errors": [
+                        "Нельзя обмениваться объявлениями одного пользователя."
+                    ]
+                }
+            )
+
+        default_status, _ = ExchangeStatus.objects.get_or_create(
+            status="Ожидание"
+        )
+
+        data["status"] = default_status
         instance = Exchange(
             ad_sender=data.get("ad_sender"),
             ad_receiver=data.get("ad_receiver"),
+            status=default_status,
         )
         try:
-            instance.check_validity()
+            instance.full_clean()
         except ValidationError as e:
             raise serializers.ValidationError(
                 e.message_dict if hasattr(e, "message_dict") else e.messages
@@ -82,12 +122,5 @@ class ExchangeSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        
-        default_status, _ = ExchangeStatus.objects.get_or_create(
-                status="Ожидание",
-            )
 
-        return Exchange.objects.create(
-            status=default_status,
-            **validated_data,
-        )
+        return Exchange.objects.create(**validated_data)

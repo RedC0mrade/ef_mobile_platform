@@ -8,7 +8,6 @@ class UserAccesMixin(AccessMixin):
     permission_denied_message = "У вас нет прав для редактирования этого объекта"
 
     def dispatch(self, request, *args, **kwargs):
-        # Не делаем проверку, если это CreateView (объекта ещё нет)
         if isinstance(self, CreateView):
             return super().dispatch(request, *args, **kwargs)
 

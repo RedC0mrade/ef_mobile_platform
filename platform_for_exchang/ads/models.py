@@ -56,7 +56,7 @@ class Ad(models.Model):
         verbose_name = "Ad"
 
     def __str__(self):
-        return f'Объявление "{self.title}" от {self.user.username}'
+        return f'Объявление "{self.title}"'
 
 
 class ExchangeStatus(models.Model):
@@ -100,21 +100,17 @@ class Exchange(models.Model):
             )
         ]
 
-    def check_validity(self):
+    def clean(self):
         if self.ad_sender == self.ad_receiver:
             raise ValidationError("Нельзя обменивать одно и то же объявление.")
         if self.ad_sender.user == self.ad_receiver.user:
             raise ValidationError(
                 "Нельзя обмениваться объявлениями одного пользователя."
             )
-        if Exchange.objects.filter(
-            ad_sender=self.ad_receiver,
-            ad_receiver=self.ad_sender,
-        ).exists():
-            raise ValidationError("Такой обмен уже существует.")
-
-    def clean(self):
-        self.check_validity()
+        if not self.ad_sender or not self.ad_receiver:
+            raise ValidationError(
+                "Не установлены объявления отправителя и получателя"
+            )
 
     def save(self, *args, **kwargs):
         self.full_clean()

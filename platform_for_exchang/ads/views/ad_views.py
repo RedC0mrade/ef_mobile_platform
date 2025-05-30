@@ -5,9 +5,7 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpRequest, HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (
     TemplateView,
@@ -25,27 +23,6 @@ from ads.models import Ad, Category, Condition, Exchange, ExchangeStatus
 from ads.forms import AdForm, AdForm, ExchangeForm
 
 
-@login_required
-def ad_card_preview(request, pk):
-    """Возвращает HTML карточки объявления по ID, используется в AJAX"""
-    ad = (
-        Ad.objects.filter(pk=pk)
-        .select_related(
-            "category",
-            "condition",
-            "user",
-        )
-        .first()
-    )
-    if not ad:
-        return JsonResponse(
-            {"html": '<p class="text-danger">Объявление не найдено.</p>'}
-        )
-
-    html = render_to_string("ads/components/ad_card.html", {"ad": ad})
-    return JsonResponse({"html": html})
-
-
 class AdsMyOffersView(LoginRequiredMixin, ListView):
     template_name = "ads/ad_my_offers.html"
     context_object_name = "offers"
@@ -56,8 +33,15 @@ class AdsMyOffersView(LoginRequiredMixin, ListView):
                 ad_sender__user=self.request.user,
                 status__status="Ожидание",
             )
-            .select_related("ad_sender", "ad_receiver", "status")
-            .order_by("status", "-created_at")
+            .select_related(
+                "ad_sender",
+                "ad_receiver",
+                "status",
+            )
+            .order_by(
+                "status",
+                "-created_at",
+            )
         )
 
 
@@ -69,8 +53,15 @@ class AdsIncomingRequestsView(LoginRequiredMixin, ListView):
         return (
             Exchange.objects.filter(ad_receiver__user=self.request.user)
             .exclude(status__status="Отклонено")
-            .select_related("ad_sender", "ad_receiver", "status")
-            .order_by("status", "-created_at")
+            .select_related(
+                "ad_sender",
+                "ad_receiver",
+                "status",
+            )
+            .order_by(
+                "status",
+                "-created_at",
+            )
         )
 
 
@@ -101,7 +92,11 @@ def reject_exchange(request, pk):
 
 
 def delete_exchange(request, pk):
-    exchange = get_object_or_404(Exchange, id=pk, ad_sender__user=request.user)
+    exchange = get_object_or_404(
+        Exchange,
+        id=pk,
+        ad_sender__user=request.user,
+    )
 
     if request.method == "POST":
         exchange.delete()
@@ -149,13 +144,12 @@ class AdsListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-
         context["categories"] = Category.objects.all()
         context["conditions"] = Condition.objects.all()
 
-        context['current_search'] = self.request.GET.get('search', '')
-        context['current_category'] = self.request.GET.get('category', '')
-        context['current_condition'] = self.request.GET.get('condition', '')
+        context["current_search"] = self.request.GET.get("search", "")
+        context["current_category"] = self.request.GET.get("category", "")
+        context["current_condition"] = self.request.GET.get("condition", "")
         return context
 
 
@@ -234,7 +228,9 @@ class AdCreateExchangeView(LoginRequiredMixin, UserAccesMixin, CreateView):
         return form
 
     def get_available_sender_ads(self, receiver_ad):
-        """Возвращает объявления пользователя, доступные для обмена"""
+        """
+        Возвращает объявления пользователя, доступные для обмена
+        """
 
         return (
             Ad.objects.filter(user=self.request.user)
@@ -246,7 +242,9 @@ class AdCreateExchangeView(LoginRequiredMixin, UserAccesMixin, CreateView):
         )
 
     def get_receiver_ad(self):
-        """Получает объявление-получатель с проверкой"""
+        """
+        Получает объявление с проверкой на принадлежность получателю
+        """
         ad = get_object_or_404(Ad, pk=self.kwargs["pk"])
 
         if ad.user == self.request.user:
@@ -256,24 +254,24 @@ class AdCreateExchangeView(LoginRequiredMixin, UserAccesMixin, CreateView):
 
         return ad
 
-    def form_valid(self, form):
-        ad_sender = form.cleaned_data["ad_sender"]
-        ad_receiver = self.get_receiver_ad()
-
-        form.instance.ad_sender = ad_sender
-        form.instance.ad_receiver = ad_receiver
+    def post(self, request, *args, **kwargs):
+        """
+        Для корректной валидации формы.
+        Устанавливаем ad_receiver, до проверки clean.
+        """
+        self.object = None
+        form = self.get_form()
+        form.instance.ad_receiver = self.get_receiver_ad()
         form.instance.status, _ = ExchangeStatus.objects.get_or_create(
             status="Ожидание"
         )
 
-        print("Проверка valid:", ad_sender, ad_receiver)
-
-        try:
-            form.instance.check_validity()
-        except ValidationError as e:
-            form.add_error(None, e)
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
             return self.form_invalid(form)
 
+    def form_valid(self, form):
         return super().form_valid(form)
 
     def check_validity(self):
@@ -284,3 +282,28 @@ class AdCreateExchangeView(LoginRequiredMixin, UserAccesMixin, CreateView):
 
         if self.ad_sender == self.ad_receiver:
             raise ValidationError("Нельзя обменивать объявление само на себя")
+
+
+@login_required
+def ad_card_preview(request, pk):
+    """Возвращает HTML карточки объявления по ID, используется в AJAX"""
+    ad = (
+        Ad.objects.filter(pk=pk)
+        .select_related(
+            "category",
+            "condition",
+            "user",
+        )
+        .first()
+    )
+    if not ad:
+        return JsonResponse(
+            {"html": '<p class="text-danger">Объявление не найдено.</p>'}
+        )
+
+    html = render_to_string("ads/components/ad_card.html", {"ad": ad})
+    return JsonResponse({"html": html})
+
+
+def custom_404_view(request, exception):
+    return render(request, "404.html", status=404)
