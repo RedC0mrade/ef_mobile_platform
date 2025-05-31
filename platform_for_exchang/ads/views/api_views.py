@@ -72,7 +72,6 @@ class AdExchangeViewSet(viewsets.ModelViewSet):
         Проверяет права на создание обмена
         """
         ad_sender = serializer.validated_data["ad_sender"]
-        ad_receiver = serializer.validated_data["ad_receiver"]
 
         if ad_sender.user != self.request.user:
             raise serializers.ValidationError(

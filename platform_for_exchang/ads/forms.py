@@ -1,7 +1,6 @@
 from django import forms
-from django.core.exceptions import ValidationError
 
-from .models import Ad, Category, Condition, Exchange, ExchangeStatus
+from .models import Ad, Category, Condition, Exchange
 
 
 class ExchangeForm(forms.ModelForm):

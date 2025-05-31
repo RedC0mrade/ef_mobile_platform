@@ -1,6 +1,6 @@
 import pytest
 from django.urls import reverse
-from ads.models import Ad, Exchange, ExchangeStatus
+from ads.models import Ad, Exchange
 
 
 @pytest.mark.django_db
@@ -274,38 +274,6 @@ def test_ad_detail(client, ad_two):
 
 
 @pytest.mark.django_db
-def test_ad_delete(client, ad_two):
-    """Тест на удаление не зарегистрированному пользователю
-    которого редериктет на страницу login.html."""
-    url = reverse(
-        "ads:delete",
-        kwargs={"pk": ad_two.pk},
-    )
-    response = client.post(url)
-    ads = Ad.objects.all()
-    assert response.url == reverse("ads:login")
-    assert response.status_code == 302
-    assert ad_two in ads
-
-
-@pytest.mark.django_db
-def test_ad_delete_no_auth_user(
-    client,
-    user_one_logged_in,
-    ad_two,
-):
-    """Тест на удаление зарегистрированному, но не владельцу, пользователю."""
-    url = reverse(
-        "ads:delete",
-        kwargs={"pk": ad_two.pk},
-    )
-    response = client.post(url)
-    ads = Ad.objects.all()
-    assert response.status_code == 403
-    assert ad_two in ads
-
-
-@pytest.mark.django_db
 def test_ad_delete(
     client,
     user_two_logged_in,
@@ -324,12 +292,30 @@ def test_ad_delete(
 
 
 @pytest.mark.django_db
+def test_ad_delete_no_auth_user(
+    client,
+    ad_two,
+):
+    """Тест на удаление не зарегистрированному пользователю
+    которого редериктет на страницу login.html."""
+    url = reverse(
+        "ads:delete",
+        kwargs={"pk": ad_two.pk},
+    )
+    response = client.post(url)
+    ads = Ad.objects.all()
+    assert response.url == reverse("ads:login")
+    assert response.status_code == 302
+    assert ad_two in ads
+
+
+@pytest.mark.django_db
 def test_ad_delete_wrong_user(
     client,
     user_one_logged_in,
     ad_two,
 ):
-    """Тест на удаление зарегистрированному, но чужому, пользователю."""
+    """Тест на удаление зарегистрированному, но не владельцу, пользователю."""
     url = reverse(
         "ads:delete",
         kwargs={"pk": ad_two.pk},
@@ -337,6 +323,7 @@ def test_ad_delete_wrong_user(
     response = client.post(url)
     ads = Ad.objects.all()
     assert response.status_code == 403
+    assert ad_two in ads
 
 
 @pytest.mark.django_db
@@ -359,7 +346,7 @@ def test_ad_edit(
             "description": "description test",
             "category": category_car.id,
             "condition": condition_old.id,
-            "image_url": ad_two.image_url
+            "image_url": ad_two.image_url,
         },
     )
     assert response.status_code == 302
@@ -390,7 +377,7 @@ def test_ad_edit_wrong_user(
             "description": "description test",
             "category": category_car.id,
             "condition": condition_old.id,
-            "image_url": ad_two.image_url
+            "image_url": ad_two.image_url,
         },
     )
 
@@ -424,7 +411,11 @@ def test_ad_create_authenticated_user(
 
 
 @pytest.mark.django_db
-def test_ad_create_unauthenticated_user(client, category_books, condition_new,):
+def test_ad_create_unauthenticated_user(
+    client,
+    category_books,
+    condition_new,
+):
     """Создание объявления неавторизованным пользователем."""
     url = reverse("ads:create")
     response = client.post(
@@ -435,7 +426,6 @@ def test_ad_create_unauthenticated_user(client, category_books, condition_new,):
             "category": category_books.id,
             "condition": condition_new.id,
             "image_url": "https://img.freepik.com/premium-vector/no-photo-available-vector-icon-default-image-symbol-picture-coming-soon-web-site-mobile-app_87543-18055.jpg",
-
         },
     )
 
@@ -518,7 +508,11 @@ def test_create_exchange_same_ad(
 
 @pytest.mark.django_db
 def test_exchange_duplicate_filtered_out(
-    client, user_one_logged_in, ad_one, ad_two, exchange_one,
+    client,
+    user_one_logged_in,
+    ad_one,
+    ad_two,
+    exchange_one,
 ):
     """
     Повторный обмен с уже использованным ad_sender/ad_receiver невозможен.

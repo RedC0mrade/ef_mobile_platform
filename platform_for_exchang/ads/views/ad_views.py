@@ -16,11 +16,11 @@ from django.views.generic import (
     UpdateView,
 )
 from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
 from ads.mixin import UserAccesMixin
 from ads.models import Ad, Category, Condition, Exchange, ExchangeStatus
-from ads.forms import AdForm, AdForm, ExchangeForm
+from ads.forms import AdForm, ExchangeForm
 
 
 class AdsMyOffersView(LoginRequiredMixin, ListView):
@@ -175,7 +175,10 @@ class AdEditView(
     template_name = "ads/ad_edit.html"
 
     def get_success_url(self):
-        return reverse("ads:detail", kwargs={"pk": self.object.pk})
+        return reverse(
+            "ads:detail",
+            kwargs={"pk": self.object.pk},
+        )
 
 
 class AdCreateView(
@@ -301,9 +304,16 @@ def ad_card_preview(request, pk):
             {"html": '<p class="text-danger">Объявление не найдено.</p>'}
         )
 
-    html = render_to_string("ads/components/ad_card.html", {"ad": ad})
+    html = render_to_string(
+        "ads/components/ad_card.html",
+        {"ad": ad},
+    )
     return JsonResponse({"html": html})
 
 
 def custom_404_view(request, exception):
-    return render(request, "404.html", status=404)
+    return render(
+        request,
+        "404.html",
+        status=404,
+    )

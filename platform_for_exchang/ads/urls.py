@@ -15,6 +15,8 @@ from .routers import router
 
 app_name = "ads"
 
+handler404 = 'ads.views.ad_views.custom_404_view'
+
 schema_view = get_schema_view(
     openapi.Info(
         title="platform_for_exchang",

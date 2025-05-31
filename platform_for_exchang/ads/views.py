@@ -1,10 +1,3 @@
-from django import forms
-from django.shortcuts import get_object_or_404
-from django.db.models import Q
-from django.http import JsonResponse
-from django.template.loader import render_to_string
-from django.core.exceptions import PermissionDenied, ValidationError
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse
@@ -17,12 +10,11 @@ from django.views.generic import (
     DeleteView,
     UpdateView,
 )
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
 from .mixin import UserAccesMixin
-from .models import Ad, Exchange, ExchangeStatus
-from .forms import AdForm, AdForm, ExchangeForm
+from .models import Ad
+from .forms import AdForm
 
 
 def register_view(request: HttpRequest) -> HttpResponse:

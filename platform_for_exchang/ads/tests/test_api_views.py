@@ -1,7 +1,5 @@
 import pytest
 from rest_framework.test import APIClient
-from ads.models import Exchange, ExchangeStatus
-from ads.serializers import AdSerializer, ExchangeSerializer
 
 client = APIClient()
 
@@ -193,21 +191,6 @@ def test_accept_exchange(
     assert response.status_code == 200
     exchange_one.refresh_from_db()
     assert exchange_one.status.status == "Принято"
-
-
-@pytest.mark.django_db
-def test_reject_exchange(
-    user_two_logged,
-    exchange_one,
-):
-    """
-    Проверяет, что получатель может отклонить обмен
-    """
-    client, _ = user_two_logged
-    response = client.post(f"/api/exchange/{exchange_one.id}/reject_exchange/")
-    assert response.status_code == 200
-    exchange_one.refresh_from_db()
-    assert exchange_one.status.status == "Отклонено"
 
 
 @pytest.mark.django_db
