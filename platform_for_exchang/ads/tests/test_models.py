@@ -16,6 +16,7 @@ def test_fixtures_users(
     assert user_one in users
     assert user_two in users
 
+
 def test_fixtures_users_logged_in(
     user_one_logged_in,
     user_two_logged_in,
@@ -32,7 +33,7 @@ def test_fixtures_category(
 ):
     categories = Category.objects.all()
     assert len(categories) == 2
-    assert category_books in categories 
+    assert category_books in categories
     assert category_car in categories
 
 
@@ -57,6 +58,7 @@ def test_fixtures_ad(
     assert ad_two in ads
     assert ad_tree in ads
 
+
 def test_fixtures_exchange(
     exchange_one,
     exchange_two,
@@ -72,12 +74,13 @@ def test_create_exchange_for_self_ad(ad_one, exchange_status_waiting):
 
     with pytest.raises(ValidationError) as excinfo:
         Exchange.objects.create(
-        ad_sender=ad_one,
-        ad_receiver=ad_one,
-        status=exchange_status_waiting,
-    )
+            ad_sender=ad_one,
+            ad_receiver=ad_one,
+            status=exchange_status_waiting,
+        )
     error_message = excinfo.value.messages[0]
     assert "Нельзя обменивать одно и то же объявление." == error_message
+
 
 def test_create_exchange_for_same_ad(
     ad_one,
@@ -86,14 +89,16 @@ def test_create_exchange_for_same_ad(
 ):
     """Проверяем создание обмена на свое объявление"""
     with pytest.raises(ValidationError) as excinfo:
-        
+
         Exchange.objects.create(
             ad_sender=ad_one,
             ad_receiver=ad_four,
             status=exchange_status_waiting,
         )
     error_message = excinfo.value.messages[0]
-    assert "Нельзя обмениваться объявлениями одного пользователя." == error_message
+    assert (
+        "Нельзя обмениваться объявлениями одного пользователя." == error_message
+    )
 
 
 def test_cheak_unique_constraint(
@@ -117,5 +122,6 @@ def test_cheak_unique_constraint(
 
     error_message = excinfo.value.messages[0]
     assert (
-        "Exchange with this Ad sender and Ad receiver already exists." == error_message
+        "Exchange with this Ad sender and Ad receiver already exists."
+        == error_message
     )

@@ -2,10 +2,14 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import AccessMixin
 from django.views.generic.edit import CreateView
 
+
 class UserAccesMixin(AccessMixin):
     """Миксин проверки прав пользователя"""
-    user_field = 'user'
-    permission_denied_message = "У вас нет прав для редактирования этого объекта"
+
+    user_field = "user"
+    permission_denied_message = (
+        "У вас нет прав для редактирования этого объекта"
+    )
 
     def dispatch(self, request, *args, **kwargs):
         if isinstance(self, CreateView):

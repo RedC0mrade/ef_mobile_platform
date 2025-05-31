@@ -37,7 +37,11 @@ class Ad(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     image_url = models.URLField(
-        default="https://img.freepik.com/premium-vector/no-photo-available-vector-icon-default-image-symbol-picture-coming-soon-web-site-mobile-app_87543-18055.jpg",
+        default=(
+            "https://img.freepik.com/premium-vector/"
+            "no-photo-available-vector-icon-default-image-symbol-"
+            "picture-coming-soon-web-site-mobile-app_87543-18055.jpg"
+        )
     )
     category = models.ForeignKey(
         Category,
@@ -117,4 +121,8 @@ class Exchange(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Обмен от {self.ad_sender.user.username} к {self.ad_receiver.user.username} – status {self.status.status}"
+        return (
+            f"Обмен от {self.ad_sender.user.username} "
+            f"к {self.ad_receiver.user.username} – "
+            f"статус {self.status.status}"
+        )

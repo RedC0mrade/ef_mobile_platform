@@ -60,7 +60,8 @@ class AdExchangeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Возвращает только обмены, связанные с объявлениями текущего пользователя
+        Возвращает только обмены, связанные
+        с объявлениями текущего пользователя
         """
         user = self.request.user
         return Exchange.objects.filter(

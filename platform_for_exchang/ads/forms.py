@@ -32,5 +32,7 @@ class AdForm(forms.ModelForm):
     def clean_image_url(self):
         url = self.cleaned_data["image_url"]
         if not url.startswith(("http://", "https://")):
-            raise forms.ValidationError("URL должен начинаться с http:// или https://")
+            raise forms.ValidationError(
+                "URL должен начинаться с http:// или https://"
+            )
         return url
