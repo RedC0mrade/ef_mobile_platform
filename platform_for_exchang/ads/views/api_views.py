@@ -42,8 +42,8 @@ class AdViewSet(viewsets.ModelViewSet):
         IsOwnerOrReadOnly,
     ]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ["category", "condition"]
-    search_fields = ["title", "description"]
+    filterset_fields = ["category", "condition",]
+    search_fields = ["title", "description",]
     pagination_class = StandardResultsSetPagination
 
     def perform_create(self, serializer):
